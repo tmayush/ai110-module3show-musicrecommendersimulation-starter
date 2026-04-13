@@ -75,6 +75,21 @@ uv run pytest
 
 ---
 
+## Terminal Output
+
+### Default weights
+
+![Happy Pop Fan and Chill Lofi results](screenshots/1.png)
+![Chill Lofi continued, Intense Rock, and experiment start](screenshots/2.png)
+
+### Experimental weights (energy x2, genre /2)
+
+![Experiment: Happy Pop Fan](screenshots/3.png)
+![Experiment: Chill Lofi and Intense Rock](screenshots/4.png)
+![Experiment: Intense Rock continued](screenshots/5.png)
+
+---
+
 ## Experiments You Tried
 
 ### Profile comparisons
