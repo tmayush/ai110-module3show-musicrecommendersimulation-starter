@@ -88,40 +88,41 @@ def load_songs(csv_path: str) -> List[Dict]:
     return songs
 
 
-def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
+def score_song(user_prefs: Dict, song: Dict, weights: Optional[Dict] = None) -> Tuple[float, List[str]]:
     """Scores a single song against user preferences and returns (score, reasons)."""
+    w = weights or {"genre": 2.0, "mood": 1.5, "energy": 1.0, "acoustic": 0.5}
     score = 0.0
     reasons = []
 
-    # Genre match: +2.0
+    # Genre match
     if song["genre"].lower() == user_prefs["genre"].lower():
-        score += 2.0
-        reasons.append("genre match (+2.0)")
+        score += w["genre"]
+        reasons.append(f"genre match (+{w['genre']})")
 
-    # Mood match: +1.5
+    # Mood match
     if song["mood"].lower() == user_prefs["mood"].lower():
-        score += 1.5
-        reasons.append("mood match (+1.5)")
+        score += w["mood"]
+        reasons.append(f"mood match (+{w['mood']})")
 
-    # Energy similarity: up to +1.0 (closer to target = more points)
+    # Energy similarity: up to w["energy"] points (closer to target = more points)
     energy_diff = abs(song["energy"] - user_prefs["energy"])
-    energy_score = round(1.0 - energy_diff, 2)
+    energy_score = round(w["energy"] * (1.0 - energy_diff), 2)
     score += energy_score
     reasons.append(f"energy similarity (+{energy_score})")
 
-    # Acousticness bonus: +0.5 if user likes acoustic and song is acoustic
+    # Acousticness bonus if user likes acoustic and song is acoustic
     if user_prefs.get("likes_acoustic") and song["acousticness"] > 0.7:
-        score += 0.5
-        reasons.append("acoustic bonus (+0.5)")
+        score += w["acoustic"]
+        reasons.append(f"acoustic bonus (+{w['acoustic']})")
 
     return round(score, 2), reasons
 
 
-def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
+def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5, weights: Optional[Dict] = None) -> List[Tuple[Dict, float, str]]:
     """Scores all songs, ranks them, and returns the top k with explanations."""
     scored = []
     for song in songs:
-        song_score, reasons = score_song(user_prefs, song)
+        song_score, reasons = score_song(user_prefs, song, weights)
         explanation = "; ".join(reasons)
         scored.append((song, song_score, explanation))
 

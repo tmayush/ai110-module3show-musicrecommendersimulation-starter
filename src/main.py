@@ -13,15 +13,17 @@ from recommender import load_songs, recommend_songs
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def print_recommendations(profile_name: str, user_prefs: dict, songs: list) -> None:
+def print_recommendations(profile_name: str, user_prefs: dict, songs: list, weights: dict = None) -> None:
     """Prints the top 5 recommendations for a given profile."""
     print(f"\n{'='*60}")
     print(f"  Profile: {profile_name}")
     print(f"  Prefs: genre={user_prefs['genre']}, mood={user_prefs['mood']}, "
           f"energy={user_prefs['energy']}, acoustic={user_prefs.get('likes_acoustic', False)}")
+    if weights:
+        print(f"  Weights: {weights}")
     print(f"{'='*60}")
 
-    recommendations = recommend_songs(user_prefs, songs, k=5)
+    recommendations = recommend_songs(user_prefs, songs, k=5, weights=weights)
 
     for i, (song, score, explanation) in enumerate(recommendations, 1):
         print(f"\n  {i}. {song['title']} by {song['artist']}")
@@ -67,6 +69,17 @@ def main() -> None:
 
     for name, prefs in profiles:
         print_recommendations(name, prefs, songs)
+
+    # --- Experiment: Weight Shift ---
+    # Double energy weight, halve genre weight to test sensitivity
+    experimental_weights = {"genre": 1.0, "mood": 1.5, "energy": 2.0, "acoustic": 0.5}
+
+    print("\n" + "#" * 60)
+    print("  EXPERIMENT: Energy x2, Genre /2")
+    print("#" * 60)
+
+    for name, prefs in profiles:
+        print_recommendations(f"{name} [experimental]", prefs, songs, weights=experimental_weights)
 
 
 if __name__ == "__main__":
